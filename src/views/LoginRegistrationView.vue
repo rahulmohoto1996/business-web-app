@@ -7,7 +7,7 @@
                     <div class="fields">
                         <div>User ID</div>
                         <div>
-                            <input disabled="true" v-model="registeredUser.userId">
+                            <input v-model="registeredUser.userId">
                         </div>
                     </div>
 
@@ -53,6 +53,7 @@
                         <button @click="resetPassword">Reset</button>
                         <spinner v-if="inProgress" size="small"></spinner>
                     </div>
+                    <a href="javascript:void(0)" @click="gotoLogin">Goto Login</a>
                 </div>
             </div>
         </div>
@@ -176,12 +177,14 @@ export default {
                 alert('userMail not provided.');
                 return;
             }
+            this.inProgress = true;
 
             let res = await axiosApi.get("/users/reset/userMail/" + userMail); //https://express-app-r2vg.onrender.com/ //http://localhost:5000/events/
             res = res.data;
 
             if (!res || !res.ok) {
                 alert("Couldn't perform reset. Status:" + res.status);
+                this.inProgress = false;
                 return;
             }
 
@@ -192,6 +195,8 @@ export default {
             } else {
                 alert('User not found. Provide correct mail or, perform registration if new user.');
             }
+
+            this.inProgress = false;
 
             debugger;
         },
@@ -223,6 +228,7 @@ export default {
         gotoLogin() {
             debugger;
             this.isNewUser = false;
+            this.hasUserForgotPassword = false;
         },
 
         async login() {
