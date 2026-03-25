@@ -1,7 +1,7 @@
 <template>
 
     <div v-if="!isNewUser">
-        <div class="flex-container-parent">
+        <div v-if="!hasUserForgotPassword" class="flex-container-parent">
             <div class="flex-container">
                 <div style="margin: 20px;">
                     <div class="fields">
@@ -25,7 +25,33 @@
                             <button @click="login">Login</button>
                             <spinner v-if="inProgress" size="small"></spinner>
                         </div>
-                        <a v-if="!isRegisteredAlready" href="javascript:void(0)" @click="toogleRegistration">New User? Register Here</a>
+
+                        <div class="action-bar">
+                            <a v-if="!isRegisteredAlready" href="javascript:void(0)" @click="toogleRegistration">
+                                New User? Register Here
+                            </a>
+
+                            <a v-if="!isRegisteredAlready" href="javascript:void(0)" @click="toggleForgotPassword">
+                                Forgot password?
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-else class="flex-container-parent">
+            <div class="flex-container reset">
+                <div class="fields">
+                    <div>User mail</div>
+                    <div>
+                        <input v-model="registeredUser.mail">
+                    </div>
+                </div>
+
+                <div class="fields">
+                    <div style="display: flex; gap: 10px;">
+                        <button @click="resetPassword">Reset</button>
+                        <spinner v-if="inProgress" size="small"></spinner>
                     </div>
                 </div>
             </div>
@@ -85,16 +111,27 @@
     justify-content: space-around;
 }
 
+.reset {
+    height: 100px;
+    padding-top: 10px;
+}
+
 .fields {
     display: flex;
     justify-content: space-between;
     gap: 40px;
     margin-bottom: 20px;
 }
+
+.action-bar {
+    display: flex; 
+    flex-direction: column; 
+    align-items: end;
+}
 </style>
 
 <script>
-import axios from "axios"
+import axiosApi from "../js/customAxios.js";
 import spinner from "@/components/spinner.vue";
 
 export default {
@@ -111,17 +148,52 @@ export default {
             },
             registeredUser: {
                 userId: null,
-                password: null
+                password: null,
+                mail: null
             },
             registrationMessage: 'Registered already? Goto login',
             isRegisteredAlready: true,
-            inProgress: false
+            inProgress: false,
+
+            hasUserForgotPassword: false
         }
     },
     methods: {
         toogleRegistration() {
             debugger;
             this.isNewUser = true;
+        },
+
+        toggleForgotPassword() {
+            debugger;
+            this.hasUserForgotPassword = true;
+        },
+
+        async resetPassword() {
+            debugger;
+            var userMail = this.registeredUser.mail;
+            if(!userMail) {
+                alert('userMail not provided.');
+                return;
+            }
+
+            let res = await axiosApi.get("/users/reset/userMail/" + userMail); //https://express-app-r2vg.onrender.com/ //http://localhost:5000/events/
+            res = res.data;
+
+            if (!res || !res.ok) {
+                alert("Couldn't perform reset. Status:" + res.status);
+                return;
+            }
+
+            if(res.data) {
+                let userId = res.data.node;
+                let password = res.data.child.info.password;
+                alert(`Found user: ${userId}\nPassword: ${password}`);
+            } else {
+                alert('User not found. Provide correct mail or, perform registration if new user.');
+            }
+
+            debugger;
         },
 
         async register() {
@@ -134,7 +206,7 @@ export default {
                 this.inProgress = false;
                 return;
             }
-            var res = await axios.get("https://express-app-r2vg.onrender.com/register/userMail/" + userMail + "/password/" + password); //https://express-app-r2vg.onrender.com/ //http://localhost:5000/events/
+            var res = await axiosApi.get("/users/register/userMail/" + userMail + "/password/" + password); //https://express-app-r2vg.onrender.com/ //http://localhost:5000/events/
             res = res.data;
             if (!res || !res.ok) {
                 alert("Couldn't register user. Status:" + res.status);
@@ -163,7 +235,7 @@ export default {
                 this.inProgress = false;
                 return;
             }
-            var res = await axios.get("https://express-app-r2vg.onrender.com/login/userId/" + userId + "/password/" + password); //https://express-app-r2vg.onrender.com/ //http://localhost:5000/events/
+            var res = await axiosApi.get("/users/login/userId/" + userId + "/password/" + password); //https://express-app-r2vg.onrender.com/ //http://localhost:5000/events/
             res = res.data;
             if (!res || !res.ok) {
                 alert("User data unavailable. Status:" + res.status);
@@ -185,7 +257,7 @@ export default {
         var userId = localStorage.getItem('userId');
         if (!userId) {
             this.isRegisteredAlready = false;
-            alert('UserId unavailable. Please register.');
+            alert('UserId unavailable. Please login.');
             return;
         }
         this.registeredUser.userId = userId;
