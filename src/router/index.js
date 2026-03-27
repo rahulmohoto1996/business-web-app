@@ -25,6 +25,21 @@ const routes = [
     // component: () =>
     //   import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },
+  {
+    path: "/productCategories",
+    name: "productCategories",
+    component: () => import("../views/ProductCategoriesView.vue")
+  },
+  {
+    path: "/addNewProductCategory",
+    name: "addNewProductCategory",
+    component: () => import("../views/AddNewProductCategoryView.vue")
+  },
+  {
+    path: "/showProductsList",
+    name: "showProductsList",
+    component: () => import("../views/ShowProductsListView.vue")
+  }
 ]
 
 const router = createRouter({

@@ -28,7 +28,7 @@
 
                         <div class="action-bar">
                             <a v-if="!isRegisteredAlready" href="javascript:void(0)" @click="toogleRegistration">
-                                New User? Register Here
+                                New user? Register here
                             </a>
 
                             <a v-if="!isRegisteredAlready" href="javascript:void(0)" @click="toggleForgotPassword">
@@ -41,19 +41,21 @@
         </div>
         <div v-else class="flex-container-parent">
             <div class="flex-container reset">
-                <div class="fields">
-                    <div>User mail</div>
-                    <div>
-                        <input v-model="registeredUser.mail">
+                <div style="margin: 20px;">
+                    <div class="fields">
+                        <div>User mail</div>
+                        <div>
+                            <input v-model="registeredUser.mail">
+                        </div>
                     </div>
-                </div>
 
-                <div class="fields">
-                    <div style="display: flex; gap: 10px;">
-                        <button @click="resetPassword">Reset</button>
-                        <spinner v-if="inProgress" size="small"></spinner>
+                    <div class="fields">
+                        <div style="display: flex; gap: 10px;">
+                            <button @click="resetPassword">Reset</button>
+                            <spinner v-if="inProgress" size="small"></spinner>
+                        </div>
+                        <a href="javascript:void(0)" @click="gotoLogin">Goto login</a>
                     </div>
-                    <a href="javascript:void(0)" @click="gotoLogin">Goto Login</a>
                 </div>
             </div>
         </div>
@@ -64,7 +66,7 @@
             <div class="flex-container">
                 <div style="margin: 20px;">
                     <div class="fields">
-                        <div>Insert user mail</div>
+                        <div>User mail</div>
                         <div>
                             <input type="email" v-model="newUser.mail" placeholder="demo123@gmail.com">
                         </div>
@@ -94,7 +96,7 @@
 
 </template>
 
-<style>
+<style scoped>
 .flex-container-parent {
     display: flex;
     justify-content: center;
@@ -251,9 +253,11 @@ export default {
             var userData = res.data;
             this.inProgress = false;
             if(userData.password === password) {
+                localStorage.setItem('userId', userId);
                 alert('Login Successful!');
+                this.$router.replace('/productCategories');
             } else {
-                alert('Incorrect password.');
+                alert('Incorrect password or userId.');
             }
         }
 
